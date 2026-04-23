@@ -1,0 +1,26 @@
+workflows:
+  android-firebase:
+    name: Build APK
+    max_build_duration: 60
+    environment:
+      flutter: 3.19.0
+      java: 17
+    scripts:
+      - name: Setup
+        script: |
+          mkdir -p lib
+          mkdir -p android/app
+      - name: Get packages
+        script: flutter pub get
+      - name: Add google-services.json
+        script: echo $GOOGLE_SERVICES_JSON | base64 --decode > android/app/google-services.json
+      - name: Build APK
+        script: flutter build apk --release --split-per-abi --dart-define=INTASEND_KEY=$INTASEND_KEY
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+    publishing:
+      firebase:
+        firebase_token: $FIREBASE_TOKEN
+        android_app_id: $FIREBASE_ANDROID_APP_ID
+        groups: 
+          - testers
